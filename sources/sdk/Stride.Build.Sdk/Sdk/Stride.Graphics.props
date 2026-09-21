@@ -25,6 +25,9 @@
     <StrideGraphicsApi Condition="'$(StrideGraphicsApi)' == '' And '$(StridePlatform)' == 'macOS'">Vulkan</StrideGraphicsApi>
     <StrideGraphicsApi Condition="'$(StrideGraphicsApi)' == '' And '$(StridePlatform)' == 'Android'">Vulkan</StrideGraphicsApi>
     <StrideGraphicsApi Condition="'$(StrideGraphicsApi)' == '' And '$(StridePlatform)' == 'iOS'">Vulkan</StrideGraphicsApi>
+    <!-- PowerVR2 is fixed-function; there is no backend for it and no shader-based backend can
+         drive it. Null keeps the rest of the engine buildable. See docs/build/dreamcast.md. -->
+    <StrideGraphicsApi Condition="'$(StrideGraphicsApi)' == '' And '$(StridePlatform)' == 'Dreamcast'">Null</StrideGraphicsApi>
   </PropertyGroup>
 
 </Project>

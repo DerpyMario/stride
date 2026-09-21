@@ -31,6 +31,13 @@
     <StridePlatform Condition=" '$(StrideTargetFramework)' == '$(StrideFrameworkUWP)' ">UWP</StridePlatform>
     <StridePlatform Condition=" '$(StrideTargetFramework)' == '$(StrideFrameworkAndroid)' ">Android</StridePlatform>
     <StridePlatform Condition=" '$(StrideTargetFramework)' == '$(StrideFrameworkiOS)' ">iOS</StridePlatform>
+    <!-- Dreamcast has neither a TFM nor a RID of its own, so it cannot be detected from either:
+         it is selected purely by naming it in $(StridePlatforms). Because it is a bare-metal
+         cross-compilation target it is never mixed with a host platform in one invocation, so
+         naming it makes the whole invocation a Dreamcast build. Re-derived after the
+         $(StridePlatforms) defaults below (and in Stride.Frameworks.targets) so a value that
+         only becomes visible later still wins. See docs/build/dreamcast.md. -->
+    <StridePlatform Condition=" '$(StridePlatform)' == '' And $([MSBuild]::ValueOrDefault('$(StridePlatforms)', '').Contains('Dreamcast')) ">Dreamcast</StridePlatform>
     <StridePlatform Condition=" '$(StridePlatform)' == '' And '$([MSBuild]::IsOSPlatform(Linux))' ">Linux</StridePlatform>
     <StridePlatform Condition=" '$(StridePlatform)' == '' And '$([MSBuild]::IsOSPlatform(OSX))' ">macOS</StridePlatform>
     <StridePlatform Condition=" '$(StridePlatform)' == '' ">Windows</StridePlatform>
@@ -43,6 +50,10 @@
     <StridePlatformDeps Condition=" '$(StrideTargetFramework)' == '$(StrideFramework)' Or '$(StrideTargetFramework)' == '$(StrideFrameworkWindows)' Or '$(StrideTargetFramework)' == '$(StrideFrameworkmacOS)' Or '$(StrideTargetFramework)' == '$(StrideFrameworkiOS)' ">dotnet</StridePlatformDeps>
     <StridePlatformDeps Condition=" '$(StrideTargetFramework)' == '$(StrideFrameworkUWP)' ">UWP</StridePlatformDeps>
     <StridePlatformDeps Condition=" '$(StrideTargetFramework)' == '$(StrideFrameworkAndroid)' ">Android</StridePlatformDeps>
+    <!-- Keyed on the platform, not the TFM: Dreamcast shares $(StrideFramework) with desktop and
+         would otherwise inherit the desktop 'dotnet' natives. No SH-4 binaries are checked in,
+         so the deps globs are meant to find nothing rather than to find x64 ones. -->
+    <StridePlatformDeps Condition=" '$(StridePlatform)' == 'Dreamcast' ">Dreamcast</StridePlatformDeps>
   </PropertyGroup>
 
   <!-- ================================================================ -->
@@ -88,6 +99,38 @@
     <_StridePlatforms Condition="'$(StridePlatformAutoAddHost)' != 'false' And $([MSBuild]::IsOSPlatform(Windows)) And ($(_StridePlatforms.Contains(';Android;')) Or $(_StridePlatforms.Contains(';iOS;'))) And !$(_StridePlatforms.Contains(';Windows;'))">;Windows$(_StridePlatforms)</_StridePlatforms>
     <_StridePlatforms Condition="'$(StridePlatformAutoAddHost)' != 'false' And $([MSBuild]::IsOSPlatform(Linux)) And ($(_StridePlatforms.Contains(';Android;')) Or $(_StridePlatforms.Contains(';iOS;'))) And !$(_StridePlatforms.Contains(';Linux;'))">;Linux$(_StridePlatforms)</_StridePlatforms>
     <_StridePlatforms Condition="'$(StridePlatformAutoAddHost)' != 'false' And $([MSBuild]::IsOSPlatform(OSX)) And ($(_StridePlatforms.Contains(';Android;')) Or $(_StridePlatforms.Contains(';iOS;'))) And !$(_StridePlatforms.Contains(';macOS;'))">;macOS$(_StridePlatforms)</_StridePlatforms>
+
+    <!-- Re-derive for Dreamcast now that $(StridePlatforms) is fully resolved (it may have come
+         from Stride.Local.props, which is imported above). Dreamcast wins over the host-OS
+         fallback because the fallback only describes where the compiler runs, not what is being
+         built for. The graphics-API defaults below read $(StridePlatform), so this must land first. -->
+    <StridePlatform Condition="$(_StridePlatforms.Contains(';Dreamcast;'))">Dreamcast</StridePlatform>
+    <StridePlatformDeps Condition="'$(StridePlatform)' == 'Dreamcast'">Dreamcast</StridePlatformDeps>
+    <StridePlatformFullName Condition="'$(StridePlatform)' == 'Dreamcast' And '$(StrideBuildDirExtension)' == ''">Dreamcast</StridePlatformFullName>
+  </PropertyGroup>
+
+  <!-- ================================================================ -->
+  <!-- Output Isolation - Dreamcast -->
+  <!-- ================================================================ -->
+  <!-- Every other platform is told apart by its TFM (net10.0-android, net10.0-ios, ...) or, on
+       desktop, by the graphics-API folder, so their outputs never share a directory. Dreamcast
+       has neither: it builds on plain $(StrideFramework) with a single API, so without this it
+       would write Dreamcast-defined assemblies into the same bin/obj a desktop build uses — and
+       the next desktop build would link whichever got there last. Distinct roots instead, so the
+       two can coexist in one checkout.
+
+       Set here rather than alongside the other output-path logic because BaseIntermediateOutputPath
+       has to be final before the Microsoft.NET.Sdk props import reads it (restore writes
+       project.assets.json there). Both properties are left alone if a caller already set them. -->
+  <PropertyGroup Condition="'$(StridePlatform)' == 'Dreamcast'">
+    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">bin\Dreamcast\</BaseOutputPath>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">obj\Dreamcast\</BaseIntermediateOutputPath>
+    <!-- The default item globs exclude whatever BaseIntermediateOutputPath currently points at,
+         which is now the Dreamcast subfolder — leaving a desktop build's obj\<Configuration>
+         visible to them, so its generated AssemblyInfo.cs would be compiled in alongside ours
+         (CS0579). Exclude the default roots explicitly. The reverse case needs nothing: a desktop
+         build excludes obj\**, which already contains obj\Dreamcast. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);bin\**;obj\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <!-- ================================================================ -->
@@ -127,6 +170,12 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(StridePlatform)' == 'macOS'">
     <StrideGraphicsApis Condition="'$(StrideGraphicsApis)' == ''">Vulkan</StrideGraphicsApis>
+  </PropertyGroup>
+  <!-- The Dreamcast's PowerVR2 is a fixed-function part with no shader units, so none of the
+       shader-based backends can target it and no PowerVR2 backend exists yet. Null is the only
+       honest default: the engine builds and runs its frame loop, and draws nothing. -->
+  <PropertyGroup Condition="'$(StridePlatform)' == 'Dreamcast'">
+    <StrideGraphicsApis Condition="'$(StrideGraphicsApis)' == ''">Null</StrideGraphicsApis>
   </PropertyGroup>
 
   <!-- ================================================================ -->

@@ -104,6 +104,15 @@ jobs:
     with:
       build-type: Release
 
+  # Compile-only; see docs/build/dreamcast.md. Gated on the same `runtime` filter as the others
+  # because it exists to catch desktop-only assumptions leaking into shared engine code.
+  Dreamcast-Runtime:
+    needs: changes
+    if: (github.event.pull_request.draft != true || contains(github.event.pull_request.labels.*.name, 'ci-run-on-draft')) && needs.changes.outputs.runtime == 'true'
+    uses: ./.github/workflows/build-dreamcast-runtime.yml
+    with:
+      build-type: Release
+
   Windows-Runtime-D3D11:
     needs: changes
     if: (github.event.pull_request.draft != true || contains(github.event.pull_request.labels.*.name, 'ci-run-on-draft')) && needs.changes.outputs.runtime == 'true'
@@ -295,6 +304,7 @@ jobs:
       - iOS-Runtime
       - Android-Runtime
       - Linux-Runtime
+      - Dreamcast-Runtime
       - Windows-Runtime-D3D11
       - Windows-Runtime-D3D12
       - Windows-Runtime-Vulkan

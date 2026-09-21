@@ -27,6 +27,10 @@
     <StridePlatform Condition=" '$(StrideTargetFramework)' == '$(StrideFrameworkiOS)' ">iOS</StridePlatform>
     <StridePlatform Condition=" '$(StrideTargetFramework)' == '$(StrideFrameworkmacOS)' ">macOS</StridePlatform>
     <StridePlatform Condition=" '$(StrideTargetFramework)' == '$(StrideFrameworkUWP)' ">UWP</StridePlatform>
+    <!-- Dreamcast builds on the plain $(StrideFramework) moniker, so none of the TFM rules above
+         claim it. It is re-asserted last because those rules run unconditionally and a project
+         that declares its own TargetFrameworks would otherwise be left on the host platform. -->
+    <StridePlatform Condition="$(_StridePlatforms.Contains(';Dreamcast;'))">Dreamcast</StridePlatform>
   </PropertyGroup>
 
 </Project>

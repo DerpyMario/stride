@@ -63,6 +63,9 @@ namespace Stride.Games
                 case AppContextType.Headless:
                     res = new GameContextHeadless(requestedWidth, requestedHeight);
                     break;
+                case AppContextType.Dreamcast:
+                    res = NewGameContextDreamcast(requestedWidth, requestedHeight);
+                    break;
             }
 
             if (res == null)
@@ -77,6 +80,15 @@ namespace Stride.Games
         {
 #if STRIDE_PLATFORM_IOS
             return new GameContextiOS(null);
+#else
+            return null;
+#endif
+        }
+
+        public static GameContext NewGameContextDreamcast(int requestedWidth = 0, int requestedHeight = 0)
+        {
+#if STRIDE_PLATFORM_DREAMCAST
+            return new GameContextDreamcast(requestedWidth, requestedHeight);
 #else
             return null;
 #endif

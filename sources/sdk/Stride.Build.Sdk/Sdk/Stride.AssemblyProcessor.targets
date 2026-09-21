@@ -176,6 +176,11 @@
            library that runs no platform-specific code paths. -->
       <_StrideAssemblyProcessorPlatform>$(StridePlatform)</_StrideAssemblyProcessorPlatform>
       <_StrideAssemblyProcessorPlatform Condition="'$(StridePlatform)' == 'Game'">Shared</_StrideAssemblyProcessorPlatform>
+      <!-- Dreamcast is in PlatformType, but the processor runs from the prebuilt binary checked
+           into deps/AssemblyProcessor, which predates it and would throw on Enum.Parse. Shared is
+           exact rather than a stand-in: the only platform the processor branches on is iOS.
+           Safe to drop once deps/AssemblyProcessor is regenerated. -->
+      <_StrideAssemblyProcessorPlatform Condition="'$(StridePlatform)' == 'Dreamcast'">Shared</_StrideAssemblyProcessorPlatform>
       <StrideAssemblyProcessorOptions>$(StrideAssemblyProcessorOptions) --platform=$(_StrideAssemblyProcessorPlatform)</StrideAssemblyProcessorOptions>
 
       <!-- Target assembly (last positional argument) -->

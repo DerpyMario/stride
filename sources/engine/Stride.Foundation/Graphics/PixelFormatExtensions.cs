@@ -109,7 +109,7 @@ public static class PixelFormatExtensions
             B8G8R8A8_UNorm or B8G8R8A8_Typeless or B8G8R8A8_UNorm_SRgb or
             A8_UNorm => 8,
 
-            (PixelFormat) 115 => 4,  // DXGI_FORMAT_B4G4R4A4_UNORM
+            B4G4R4A4_UNorm => 4,
 
             B5G5R5A1_UNorm => 1,
 
@@ -426,6 +426,7 @@ public static class PixelFormatExtensions
 
         InitFormat(
         [
+            B4G4R4A4_UNorm,
             B5G5R5A1_UNorm,
             B5G6R5_UNorm,
             D16_UNorm,
@@ -440,9 +441,6 @@ public static class PixelFormatExtensions
             R8G8_Typeless,
             R8G8_UInt,
             R8G8_UNorm,
-#if DIRECTX11_1
-            B4G4R4A4_UNorm
-#endif
         ],
         pixelSize: 2);
 

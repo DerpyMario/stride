@@ -9,6 +9,7 @@ using Stride.Core.Diagnostics;
 using Stride.Core.Mathematics;
 using Stride.Graphics;
 using Stride.TextureConverter.Requests;
+using Stride.TextureConverter.PvrWrapper;
 using Stride.TextureConverter.TexLibraries;
 using Stride.TextureConverter.Backend.Requests;
 using System.Runtime.InteropServices;
@@ -67,6 +68,7 @@ namespace Stride.TextureConverter
                 new ImageSharpTexLib(), // used to open/save common bitmap image formats.
                 new StrideTexLibrary(), // used to save/load stride texture format.
                 new AstcTexLib(), // used to compress/decompress textures to/from ASTC LDR (4x4..12x12 block sizes).
+                new PvrTexLib(), // used to convert to/from the Dreamcast's 16-bit formats and read/write *.pvr files.
                 new ColorKeyTexLibrary(), // used to apply ColorKey on R8G8B8A8/B8G8R8A8_Unorm
                 new AtlasTexLibrary(), // used to create and manipulate texture atlas
                 new ArrayTexLib(), // used to create and manipulate texture array and texture cube
@@ -437,6 +439,36 @@ namespace Stride.TextureConverter
             }
 
             ExecuteRequest(image, request);
+        }
+
+
+        /// <summary>
+        /// Saves the specified <see cref="TexImage"/> as a Dreamcast PVR file with an explicitly
+        /// chosen layout.
+        /// </summary>
+        /// <param name="image">The image.</param>
+        /// <param name="fileName">Name of the file, which must end in <c>.pvr</c>.</param>
+        /// <param name="dataFormat">
+        /// How texels should be arranged. Promoted to the mipmapped variant of itself when the
+        /// image carries a complete mipmap chain and the layout has one.
+        /// </param>
+        /// <param name="globalIndex">The global index to record in a <c>GBIX</c> chunk, or <c>null</c> to omit it.</param>
+        /// <param name="minimumMipMapSize">Minimum size of the mip map.</param>
+        /// <remarks>
+        /// <see cref="Save(TexImage, string, int)"/> also writes PVR files, inferring a layout from
+        /// the texture's shape. Use this overload for the choices it cannot infer: vector
+        /// quantisation, which trades quality for a quarter of the size, and the global index.
+        /// The image is packed to a 16-bit colour format first if it is not already in one.
+        /// </remarks>
+        public void SavePvr(TexImage image, string fileName, PvrDataFormat dataFormat, uint? globalIndex = null, int minimumMipMapSize = 1)
+        {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                Log.Error("No file name entered.");
+                throw new TextureToolsException("No file name entered.");
+            }
+
+            ExecuteRequest(image, new PvrExportRequest(fileName, dataFormat, globalIndex, minimumMipMapSize));
         }
 
 

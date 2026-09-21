@@ -307,6 +307,27 @@ namespace Stride.Assets.Textures
                             }
                             break;
 
+                        case PlatformType.Dreamcast:
+                            // PowerVR2 samples 16-bit texels and knows nothing of BCn/ETC/ASTC, so
+                            // the choice is only how to spend those 16 bits — which comes down to
+                            // how much alpha the texture needs. PvrTexLib packs these and writes
+                            // them out as .pvr; its own VQ compression is applied at export, since
+                            // a shared codebook is a property of the file rather than of a format.
+                            // No sRGB variants exist: the hardware samples these values directly.
+                            switch (alphaMode)
+                            {
+                                case AlphaFormat.None:
+                                    outputFormat = PixelFormat.B5G6R5_UNorm;
+                                    break;
+                                case AlphaFormat.Mask:
+                                    outputFormat = PixelFormat.B5G5R5A1_UNorm;
+                                    break;
+                                default:
+                                    outputFormat = PixelFormat.B4G4R4A4_UNorm;
+                                    break;
+                            }
+                            break;
+
                         default:
                             throw new NotSupportedException("Platform " + parameters.Platform + " is not supported by TextureTool");
                     }

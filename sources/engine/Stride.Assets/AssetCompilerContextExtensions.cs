@@ -52,6 +52,10 @@ namespace Stride.Assets
                 case PlatformType.Linux:
                 case PlatformType.macOS:
                     return GraphicsPlatform.Vulkan;
+                case PlatformType.Dreamcast:
+                    // PowerVR2 is fixed-function, so no shader-based backend can drive it and no
+                    // PowerVR2 backend exists. Null lets assets compile for the platform.
+                    return GraphicsPlatform.Null;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

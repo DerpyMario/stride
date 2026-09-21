@@ -1,7 +1,9 @@
 // Copyright (c) .NET Foundation and Contributors (https://dotnetfoundation.org/ & https://stride3d.net) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
-#if STRIDE_PLATFORM_DESKTOP || STRIDE_PLATFORM_IOS
+// Also covers Dreamcast: this is the in-engine text editor used wherever there is no native
+// text widget to host, which on a console there never is.
+#if STRIDE_PLATFORM_DESKTOP || STRIDE_PLATFORM_IOS || STRIDE_PLATFORM_DREAMCAST
 using System;
 using Stride.Core;
 using Stride.Core.Mathematics;

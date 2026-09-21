@@ -21,12 +21,16 @@
   <!-- ================================================================ -->
   <PropertyGroup>
     <!-- Build all graphics APIs when StrideGraphicsApiDependent or building all -->
-    <StrideGraphicsApis Condition="('$(StrideGraphicsApis)' == '' Or '$(StrideGraphicsApiDependentBuildAll)' == 'true') And ('$(StrideTargetFramework)' == '$(StrideFramework)' Or '$(StrideTargetFramework)' == '$(StrideFrameworkWindows)')">Direct3D11;Direct3D12;Vulkan</StrideGraphicsApis>
+    <!-- Excludes Dreamcast: it shares $(StrideFramework) with desktop but has exactly one API,
+         and building the shader-based three against it would only produce unusable output. -->
+    <StrideGraphicsApis Condition="('$(StrideGraphicsApis)' == '' Or '$(StrideGraphicsApiDependentBuildAll)' == 'true') And ('$(StrideTargetFramework)' == '$(StrideFramework)' Or '$(StrideTargetFramework)' == '$(StrideFrameworkWindows)') And '$(StridePlatform)' != 'Dreamcast'">Direct3D11;Direct3D12;Vulkan</StrideGraphicsApis>
+    <StrideGraphicsApis Condition="'$(StrideGraphicsApis)' == '' And '$(StridePlatform)' == 'Dreamcast'">Null</StrideGraphicsApis>
 
     <StrideDefaultGraphicsApi Condition="'$(StrideGraphicsApis)' != ''">$(StrideGraphicsApis.Split(';', StringSplitOptions.RemoveEmptyEntries)[0])</StrideDefaultGraphicsApi>
     <StrideDefaultGraphicsApi Condition="'$(StrideTargetFramework)' == '$(StrideFrameworkUWP)'">Direct3D11</StrideDefaultGraphicsApi>
     <StrideDefaultGraphicsApi Condition="'$(StrideTargetFramework)' == '$(StrideFrameworkAndroid)'">Vulkan</StrideDefaultGraphicsApi>
     <StrideDefaultGraphicsApi Condition="'$(StrideTargetFramework)' == '$(StrideFrameworkiOS)'">Vulkan</StrideDefaultGraphicsApi>
+    <StrideDefaultGraphicsApi Condition="'$(StridePlatform)' == 'Dreamcast'">Null</StrideDefaultGraphicsApi>
   </PropertyGroup>
 
   <!-- Some platforms only have a single graphics API.
@@ -36,6 +40,7 @@
     <StrideGraphicsApiDependent Condition="'$(StrideTargetFramework)' == '$(StrideFrameworkiOS)'">false</StrideGraphicsApiDependent>
     <StrideGraphicsApiDependent Condition="'$(StrideTargetFramework)' == '$(StrideFrameworkAndroid)'">false</StrideGraphicsApiDependent>
     <StrideGraphicsApiDependent Condition="'$(StrideTargetFramework)' == '$(StrideFrameworkmacOS)'">false</StrideGraphicsApiDependent>
+    <StrideGraphicsApiDependent Condition="'$(StridePlatform)' == 'Dreamcast'">false</StrideGraphicsApiDependent>
     <StrideGraphicsApi Condition="'$(StrideGraphicsApiDependent)' == 'false'">$(StrideDefaultGraphicsApi)</StrideGraphicsApi>
   </PropertyGroup>
 
@@ -88,6 +93,9 @@
   <!-- ================================================================ -->
   <PropertyGroup>
     <StrideUI Condition="'$(StrideTargetFramework)' != '$(StrideFrameworkUWP)'">SDL</StrideUI>
+    <!-- The Dreamcast has no window manager and no SDL port reachable from .NET: the game owns
+         the framebuffer outright, so the SDL windowing backend is left out entirely. -->
+    <StrideUI Condition="'$(StridePlatform)' == 'Dreamcast'"></StrideUI>
     <StrideUI Condition="'$(StrideTargetFramework)' == '$(StrideFrameworkWindows)' AND ('$(StrideGraphicsApi)' == 'Direct3D11' Or '$(StrideGraphicsApi)' == 'Direct3D12' Or '$(StrideGraphicsApi)' == 'Vulkan')">$(StrideUI);WINFORMS;WPF</StrideUI>
 
     <DefineConstants Condition="$(StrideUI.Contains('SDL'))">$(DefineConstants);STRIDE_UI_SDL</DefineConstants>

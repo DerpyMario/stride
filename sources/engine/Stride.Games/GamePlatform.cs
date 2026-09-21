@@ -69,6 +69,8 @@ namespace Stride.Games
             return new GamePlatformAndroid(game);
 #elif STRIDE_PLATFORM_IOS
             return new GamePlatformiOS(game);
+#elif STRIDE_PLATFORM_DREAMCAST
+            return new GamePlatformDreamcast(game);
 #else
             // Here we cover all Desktop variants: OpenTK, SDL, Winforms,...
             return new GamePlatformDesktop(game);

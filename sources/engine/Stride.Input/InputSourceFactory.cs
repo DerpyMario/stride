@@ -50,6 +50,13 @@ namespace Stride.Input
                         return new InputSourceWinforms(((GameContextWinforms)context).Control);
                     goto default;
 #endif
+#if STRIDE_PLATFORM_DREAMCAST
+                case AppContextType.Dreamcast:
+                    // Controllers, VMUs and the rest hang off the Maple bus, which needs a host
+                    // layer that does not exist yet — see docs/build/dreamcast.md. Returning null
+                    // gives a game with no input rather than a game that will not start.
+                    return null;
+#endif
                 case AppContextType.Headless:
                     return null; // No input source in headless mode
                 default:
