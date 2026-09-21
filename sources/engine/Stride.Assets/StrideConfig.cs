@@ -168,6 +168,23 @@ namespace Stride.Assets
                     "<MtouchArch>i386, x86_64</MtouchArch>"
                 });
 
+            // Dreamcast
+            var dreamcastPlatform = new SolutionPlatform()
+            {
+                Name = PlatformType.Dreamcast.ToString(),
+                Type = PlatformType.Dreamcast,
+                // No TFM or RID of its own: it cross-compiles on the plain .NET moniker and is
+                // told apart by StridePlatform/STRIDE_PLATFORM_DREAMCAST. See docs/build/dreamcast.md.
+                TargetFramework = "net10.0",
+                // Nothing can run what this produces until a .NET runtime for SH-4 exists, so the
+                // platform is listed but never offered as a build target in Game Studio.
+                IsAvailable = false,
+            };
+            dreamcastPlatform.DefineConstants.Add("STRIDE_PLATFORM_DREAMCAST");
+            dreamcastPlatform.Configurations["Debug"].Properties.Add("<StridePlatforms>Dreamcast</StridePlatforms>");
+            dreamcastPlatform.Configurations["Release"].Properties.Add("<StridePlatforms>Dreamcast</StridePlatforms>");
+            solutionPlatforms.Add(dreamcastPlatform);
+
             AssetRegistry.RegisterSupportedPlatforms(solutionPlatforms);
         }
 

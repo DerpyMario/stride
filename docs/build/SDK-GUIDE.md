@@ -342,11 +342,11 @@ Stride.Build.Sdk/Sdk/Sdk.targets (top)
 
 | Property | Purpose | Set by |
 |----------|---------|--------|
-| `StridePlatform` | Current platform (Windows, Linux, macOS, Android, iOS) | Auto-detected in Stride.Platform.props |
+| `StridePlatform` | Current platform (Windows, Linux, macOS, Android, iOS, Dreamcast) | Auto-detected in Stride.Platform.props |
 | `StridePlatformOriginal` | Original platform value before TFM-based override | Stride.Platform.props |
 | `StridePlatformFullName` | Platform name + optional `StrideBuildDirExtension` suffix | Stride.Platform.props |
 | `StridePlatforms` | Semicolon-separated list of target platforms | Auto-detected per OS |
-| `StridePlatformDeps` | Platform identifier for native deps (dotnet, Android, iOS) | Stride.Platform.props |
+| `StridePlatformDeps` | Platform identifier for native deps (dotnet, Android, iOS, Dreamcast) | Stride.Platform.props |
 
 **Platform defines** (added to `DefineConstants`):
 
@@ -355,13 +355,14 @@ Stride.Build.Sdk/Sdk/Sdk.targets (top)
 | Windows/Linux/macOS | `STRIDE_PLATFORM_DESKTOP` |
 | Android | `STRIDE_PLATFORM_MONO_MOBILE;STRIDE_PLATFORM_ANDROID` |
 | iOS | `STRIDE_PLATFORM_MONO_MOBILE;STRIDE_PLATFORM_IOS` |
+| Dreamcast | `STRIDE_PLATFORM_DREAMCAST` (**replaces** `STRIDE_PLATFORM_DESKTOP`, which it shares a TFM with) |
 | All .NET | `STRIDE_RUNTIME_CORECLR` |
 
 ### Graphics API
 
 | Property | Purpose | Set by |
 |----------|---------|--------|
-| `StrideGraphicsApi` | Current API (Direct3D11, Direct3D12, Vulkan) | Stride.Graphics.props (platform default) |
+| `StrideGraphicsApi` | Current API (Direct3D11, Direct3D12, Vulkan, Null) | Stride.Graphics.props (platform default) |
 | `StrideGraphicsApis` | Semicolon-separated list of target APIs | Stride.Graphics.props |
 | `StrideDefaultGraphicsApi` | Default/fallback API for the platform | Stride.Graphics.props |
 | `StrideGraphicsApiDependent` | Enable multi-API inner builds | Project (.csproj) |
@@ -376,6 +377,7 @@ Stride.Build.Sdk/Sdk/Sdk.targets (top)
 | macOS | Vulkan | Vulkan |
 | Android | Vulkan | Vulkan |
 | iOS | Vulkan | Vulkan |
+| Dreamcast | Null | Null |
 
 **Graphics API defines** (added to `DefineConstants`):
 
@@ -384,6 +386,7 @@ Stride.Build.Sdk/Sdk/Sdk.targets (top)
 | Direct3D11 | `STRIDE_GRAPHICS_API_DIRECT3D;STRIDE_GRAPHICS_API_DIRECT3D11` |
 | Direct3D12 | `STRIDE_GRAPHICS_API_DIRECT3D;STRIDE_GRAPHICS_API_DIRECT3D12` |
 | Vulkan | `STRIDE_GRAPHICS_API_VULKAN` |
+| Null | `STRIDE_GRAPHICS_API_NULL` |
 
 ### Build Control
 
@@ -418,7 +421,7 @@ Stride.Build.Sdk/Sdk/Sdk.targets (top)
 | `StrideUI` | Semicolon-separated UI frameworks: SDL, WINFORMS, WPF |
 | `StrideUIList` | Item group generated from `$(StrideUI)` |
 
-SDL is included for all non-UWP platforms. WINFORMS and WPF are added on Windows when using Direct3D11, Direct3D12, or Vulkan.
+SDL is included for all non-UWP platforms except Dreamcast, which has no window manager. WINFORMS and WPF are added on Windows when using Direct3D11, Direct3D12, or Vulkan.
 
 Defines: `STRIDE_UI_SDL`, `STRIDE_UI_WINFORMS`, `STRIDE_UI_WPF`.
 

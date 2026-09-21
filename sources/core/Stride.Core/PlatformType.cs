@@ -60,5 +60,14 @@ public enum PlatformType
     /// <summary>
     ///   The macOS operating system for Apple desktop and laptop computers.
     /// </summary>
-    macOS
+    macOS,
+
+    /// <summary>
+    ///   The SEGA Dreamcast console (Hitachi SH-4 CPU, PowerVR2 GPU).
+    /// </summary>
+    /// <remarks>
+    ///   This is a cross-compilation target only: there is no .NET runtime for SH-4 today,
+    ///   so nothing produced for this platform can be executed. See <c>docs/build/dreamcast.md</c>.
+    /// </remarks>
+    Dreamcast
 }

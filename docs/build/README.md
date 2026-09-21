@@ -107,5 +107,6 @@ See also [sources/templates/README.md](../../sources/templates/README.md) for it
 - [SDK-GUIDE.md](SDK-GUIDE.md) — Stride build SDK internals (target structure, project SDK selection, native build modes)
 - [versioning.md](versioning.md) — versioning &amp; release: engine version, per-checkout `-devN` dev versions, the release flow, and sample/template package versions
 - [aot.md](aot.md) — NativeAOT &amp; trimming: publishing games, feature switches for optional subsystems, keeping the engine AOT-clean
+- [dreamcast.md](dreamcast.md) — the SEGA Dreamcast target: how the platform is selected, what a Dreamcast build produces today, and what a runnable port still needs
 - [../../sources/templates/README.md](../../sources/templates/README.md) — `dotnet new` template packages (Stride.Templates.Games / .Games.Starters / .Samples): end-user usage, local dev workflow, adding a new sample
 - [../../sources/launcher/README.md](../../sources/launcher/README.md) — the `stride` CLI tool and the WPF launcher: usage, building (`PackageCli`), and the independent CLI release flow

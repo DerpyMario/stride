@@ -307,6 +307,14 @@ namespace Stride.Assets.Textures
                             }
                             break;
 
+                        case PlatformType.Dreamcast:
+                            // PowerVR2 knows nothing of BCn/ETC/ASTC — its own compression is VQ,
+                            // which no encoder here produces — so the only formats it could ever
+                            // consume are uncompressed ones. Left at 32-bit rather than the
+                            // hardware's native 16-bit until there is a backend to feed.
+                            outputFormat = parameters.IsSRgb ? PixelFormat.R8G8B8A8_UNorm_SRgb : PixelFormat.R8G8B8A8_UNorm;
+                            break;
+
                         default:
                             throw new NotSupportedException("Platform " + parameters.Platform + " is not supported by TextureTool");
                     }

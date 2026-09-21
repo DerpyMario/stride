@@ -41,6 +41,19 @@
   </PropertyGroup>
 
   <!-- ================================================================ -->
+  <!-- Platform Defines - Dreamcast -->
+  <!-- ================================================================ -->
+  <!-- Keyed on the platform rather than the TFM: Dreamcast shares $(StrideFramework) with the
+       desktop targets, so it lands in the STRIDE_PLATFORM_DESKTOP block above and has to replace
+       that value outright. STRIDE_PLATFORM_DESKTOP guards things a bare-metal console has no
+       business compiling — FileSystemWatcher, Win32 console handles, NativeLibrary probing — and
+       every one of those sites already has a non-desktop branch. Assigns rather than appends for
+       that reason; ordering matters, so keep this after the desktop block. -->
+  <PropertyGroup Condition="'$(StridePlatform)' == 'Dreamcast'">
+    <StridePlatformDefines>STRIDE_PLATFORM_DREAMCAST</StridePlatformDefines>
+  </PropertyGroup>
+
+  <!-- ================================================================ -->
   <!-- .NET Runtime Defines -->
   <!-- ================================================================ -->
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net10'))">

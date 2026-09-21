@@ -84,4 +84,13 @@ public enum AppContextType
     ///   Used for automated testing with software renderers (e.g. Lavapipe).
     /// </summary>
     Headless,
+
+    /// <summary>
+    ///   The <c>Game</c> runs on a SEGA Dreamcast, drawing straight to the console's framebuffer.
+    /// </summary>
+    /// <remarks>
+    ///   The Dreamcast has no window manager: the game owns the display outright, so this context
+    ///   carries a fixed video mode rather than a window handle.
+    /// </remarks>
+    Dreamcast,
 }

@@ -16,6 +16,15 @@ public static class Platform
     /// The current running <see cref="PlatformType"/>.
     /// </summary>
     public const PlatformType Type = PlatformType.UWP;
+#elif STRIDE_PLATFORM_DREAMCAST
+    /// <summary>
+    /// The current running <see cref="PlatformType"/>.
+    /// </summary>
+    /// <remarks>
+    /// Dreamcast is not an <see cref="OperatingSystem"/> the BCL knows about, so the build-time
+    /// define is the only source of truth here.
+    /// </remarks>
+    public const PlatformType Type = PlatformType.Dreamcast;
 #else
     /// <summary>
     /// The current running <see cref="PlatformType"/>.

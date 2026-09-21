@@ -431,6 +431,12 @@ namespace Stride.Games
             if (gameContext == null)
             {
                 AppContextType c;
+#if STRIDE_PLATFORM_DREAMCAST
+                // Checked at compile time, not through OperatingSystem: the BCL has no Dreamcast
+                // probe, so every branch below would miss and land on SDL, which is not built for
+                // this platform.
+                c = AppContextType.Dreamcast;
+#else
                 if (OperatingSystem.IsWindows() && GameContextFactory.WinFormsBackendEnabled)
                     c = AppContextType.DesktopWinForms;
                 else if (OperatingSystem.IsAndroid())
@@ -439,6 +445,7 @@ namespace Stride.Games
                     c = AppContextType.iOS;
                 else
                     c = AppContextType.DesktopSDL;
+#endif
                 gameContext = GameContextFactory.NewGameContext(c);
             }
             
