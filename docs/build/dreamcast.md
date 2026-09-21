@@ -1,9 +1,10 @@
 # Dreamcast
 
-Stride builds for the SEGA Dreamcast as a cross-compilation target. **Nothing it produces can be
-run yet** — see [What is missing](#what-is-missing). What exists today is the platform itself: the
-whole runtime compiles under `STRIDE_PLATFORM_DREAMCAST`, with the console's constraints reflected
-in the build rather than papered over.
+Stride builds for the SEGA Dreamcast as a cross-compilation target. The whole runtime compiles
+under `STRIDE_PLATFORM_DREAMCAST`, and textures convert to the console's own formats — but
+**no Dreamcast can run the result**, because no .NET runtime targets SH-4. See
+[What is missing](#what-is-missing). What exists is the platform and its asset path, with the
+console's constraints reflected in the build rather than papered over.
 
 ## Building
 
@@ -62,12 +63,57 @@ The PowerVR2 has **no programmable shader units**. Stride's renderer is shader-d
 so no existing backend can drive this GPU, and a PowerVR2 backend would have to emulate the
 engine's shading model on fixed-function hardware rather than translate to it. Until such a backend
 exists, Dreamcast builds select `GraphicsPlatform.Null`: the engine runs its frame loop and draws
-nothing. Texture assets compile to uncompressed `R8G8B8A8` — PowerVR2 knows nothing of BCn, ETC or
-ASTC, and its own VQ compression has no encoder here.
+nothing. Textures are a separate matter and do work — see [Textures](#textures).
 
 Input is unimplemented for the same reason: peripherals hang off the Maple bus, which needs a host
 layer that does not exist. `InputSourceFactory` returns `null` for a Dreamcast context, so a game
 gets no input rather than failing to start.
+
+## Textures
+
+Textures are the one part of a Dreamcast build that produces usable output today.
+`Stride.TextureConverter` gained a PowerVR2 library (`PvrTexLib`), the format layer it sits on
+(`Backend/Wrappers/Pvr/`), and `.pvr` export:
+
+```csharp
+using var tool = new TextureTool();
+using var image = tool.Load("sprite.png");
+
+tool.Save(image, "sprite.pvr");                            // layout inferred from the shape
+tool.SavePvr(image, "sprite.pvr", PvrDataFormat.Vq);       // quantised, a quarter of the size
+```
+
+The asset pipeline picks a colour format from how much alpha a texture needs, since that is all
+16 bits leave to decide:
+
+| Alpha | Format | `PixelFormat` |
+|-------|--------|---------------|
+| None | RGB565 | `B5G6R5_UNorm` |
+| Cutout | ARGB1555 | `B5G5R5A1_UNorm` |
+| Anything else | ARGB4444 | `B4G4R4A4_UNorm` |
+
+Each is exactly the Dreamcast's texel layout — what the console calls ARGB is what DXGI calls
+BGRA — so packing never reorders channels. `B4G4R4A4_UNorm` was the one of the three Stride did
+not have; it now sits at its real DXGI value, 115.
+
+On export the texels are Morton-ordered ("twiddled") into the order the hardware samples, in
+square tiles for a non-square texture. `PvrDataFormat.Vq` instead builds a 256-entry codebook of
+2x2 blocks and writes one index byte per block, a quarter of the size: below 256 distinct blocks
+that is lossless, and above it blocks are clustered by median cut, which is deterministic — the
+same texture always encodes to the same bytes, which incremental builds depend on.
+
+Three caveats worth knowing:
+
+- **None of this is validated against hardware.** The container, the twiddle order and the
+  quantised layout are implemented from the published format description, with no Dreamcast and
+  no reference files to check against. The tests assert hand-derived orders and bit patterns, so
+  they catch drift in the encoder, not a misreading of the format. The mipmap padding rule is the
+  part taken purely on documentation; it is isolated in `PvrFormat.GetMipmapPadding`.
+- **Small VQ (data formats 0x10/0x11) is not written.** It shrinks the codebook for small
+  textures, but the entry count per size differs between the tools that produce it.
+- **A PVR mipmap chain has to reach 1x1.** Asked to stop short — or given an incomplete chain, or
+  a layout with no mipmapped form — the exporter writes the base level alone rather than an
+  invalid file, and says so.
 
 ## What is missing
 
@@ -76,9 +122,10 @@ Two things stand between this target and a Dreamcast game, and neither is a smal
 1. **A .NET runtime for SH-4.** There is none. CoreCLR and NativeAOT target x64, arm64, arm32,
    riscv64 and loongarch64 — SH-4 is not among them, and no Mono port exists either. Without one,
    a Dreamcast build produces managed assemblies with nothing to execute them.
-2. **A PowerVR2 graphics backend.** `sources/engine/Stride.Graphics/Null/` is the documented
-   starting point for a new backend (see `NullHelper`); a PowerVR2 one would sit beside it. The
-   hard part is not the backend's shape but the shading model, as above.
+2. **A PowerVR2 graphics backend.** Textures already convert, but nothing draws with them.
+   `sources/engine/Stride.Graphics/Null/` is the documented starting point for a new backend (see
+   `NullHelper`); a PowerVR2 one would sit beside it. The hard part is not the backend's shape but
+   the shading model, as above.
 
 Beyond those, 16 MB of main RAM is far below what the engine currently assumes, so a usable port
 would also need work on the content pipeline and runtime allocation.

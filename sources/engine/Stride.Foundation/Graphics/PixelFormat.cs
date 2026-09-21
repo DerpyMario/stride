@@ -861,6 +861,17 @@ public enum PixelFormat
     /// </summary>
     BC7_UNorm_SRgb = 99,
 
+    /// <summary>
+    ///   A <strong>four-component</strong>, 16-bit <strong>unsigned normalized integer</strong> format that supports
+    ///   <strong>4 bits for each color channel and 4-bit alpha</strong>.
+    /// </summary>
+    /// <remarks>
+    ///   Matches the Dreamcast's ARGB4444 texel layout exactly, which is why the PVR texture library
+    ///   writes it unchanged. Sits at its real DXGI value (<c>DXGI_FORMAT_B4G4R4A4_UNORM</c>) rather
+    ///   than in the Stride-specific range that starts at <see cref="ETC1"/>.
+    /// </remarks>
+    B4G4R4A4_UNorm = 115,
+
 
     /// <summary>
     ///   A <strong>three-component</strong>, 64-bit block-compression format using the <strong>ETC1 encoding</strong>,
